@@ -9,6 +9,7 @@ mkdir -p bin
 FILES=(
     src/main.asm
     src/defs.inc
+    src/io.asm
 )
 
 TMP_ASM=$(mktemp /tmp/pbasic_XXXXXX.asm)
