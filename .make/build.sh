@@ -9,6 +9,7 @@ mkdir -p bin
 FILES=(
     src/main.asm
     src/defs.inc
+    src/strings.asm
     src/io.asm
 )
 

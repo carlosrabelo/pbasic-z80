@@ -1,5 +1,5 @@
 ; ============================================================================
-; PBasic Z80 - Console Character I/O Primitives
+; PBasic Z80 - Console Character I/O and Formatted Output Primitives
 ; ============================================================================
 
 INCHAR:
@@ -44,3 +44,155 @@ CHECK_BREAK:
     xor a
     pop bc
     ret
+
+PRINT_STR:
+    push hl
+    push af
+.pstr_loop:
+    ld a, (hl)
+    or a
+    jr z, .pstr_done
+    call OUTCHAR
+    inc hl
+    jr .pstr_loop
+.pstr_done:
+    pop af
+    pop hl
+    ret
+
+PRINT_CRLF:
+    push af
+    ld a, 10
+    call OUTCHAR
+    pop af
+    ret
+
+PRINT_OK:
+    push hl
+    ld hl, MSG_OK
+    call PRINT_STR
+    pop hl
+    ret
+
+NEG32:
+    ld a, l
+    cpl
+    ld l, a
+    ld a, h
+    cpl
+    ld h, a
+    ld a, e
+    cpl
+    ld e, a
+    ld a, d
+    cpl
+    ld d, a
+    inc hl
+    ld a, h
+    or l
+    ret nz
+    inc de
+    ret
+
+PRINT_NUMBER:
+    push af
+    push bc
+    push de
+    push hl
+    push ix
+
+    ; Check if negative
+    bit 7, d
+    jr z, .pnum_not_neg
+    ld a, '-'
+    call OUTCHAR
+    call NEG32
+
+.pnum_not_neg:
+    ld ix, POWERS_OF_10
+    ld c, 10          ; 10 powers
+    xor a
+    ld (SCR_TMP), a   ; Leading zero flag in scratchpad
+
+.pnum_power_loop:
+    ld b, 0           ; digit = 0
+
+.pnum_sub_loop:
+    ld a, d
+    cp (ix+3)
+    jr c, .pnum_cannot_sub
+    jr nz, .pnum_can_sub
+    ld a, e
+    cp (ix+2)
+    jr c, .pnum_cannot_sub
+    jr nz, .pnum_can_sub
+    ld a, h
+    cp (ix+1)
+    jr c, .pnum_cannot_sub
+    jr nz, .pnum_can_sub
+    ld a, l
+    cp (ix+0)
+    jr c, .pnum_cannot_sub
+
+.pnum_can_sub:
+    ld a, l
+    sub (ix+0)
+    ld l, a
+    ld a, h
+    sbc a, (ix+1)
+    ld h, a
+    ld a, e
+    sbc a, (ix+2)
+    ld e, a
+    ld a, d
+    sbc a, (ix+3)
+    ld d, a
+    inc b
+    jr .pnum_sub_loop
+
+.pnum_cannot_sub:
+    ; Digit is in B
+    ld a, b
+    or a
+    jr nz, .pnum_do_print
+    ld a, (SCR_TMP)
+    or a
+    jr nz, .pnum_do_print
+    ld a, c
+    cp 1
+    jr z, .pnum_do_print
+    jr .pnum_next_power
+
+.pnum_do_print:
+    ld a, 1
+    ld (SCR_TMP), a
+    ld a, b
+    add a, '0'
+    call OUTCHAR
+
+.pnum_next_power:
+    inc ix
+    inc ix
+    inc ix
+    inc ix
+    dec c
+    jr nz, .pnum_power_loop
+
+    pop ix
+    pop hl
+    pop de
+    pop bc
+    pop af
+    ret
+
+POWERS_OF_10:
+    defw 0xCA00, 0x3B9A   ; 1,000,000,000
+    defw 0xE100, 0x05F5   ; 100,000,000
+    defw 0x9680, 0x0098   ; 10,000,000
+    defw 0x4240, 0x000F   ; 1,000,000
+    defw 0x86A0, 0x0001   ; 100,000
+    defw 0x2710, 0x0000   ; 10,000
+    defw 0x03E8, 0x0000   ; 1,000
+    defw 0x0064, 0x0000   ; 100
+    defw 0x000A, 0x0000   ; 10
+    defw 0x0001, 0x0000   ; 1
