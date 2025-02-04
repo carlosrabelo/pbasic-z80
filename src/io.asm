@@ -185,6 +185,66 @@ PRINT_NUMBER:
     pop af
     ret
 
+READ_LINE:
+    push bc
+    push de
+    push hl
+    ld hl, MEM_INPUT_BUF
+    ld c, 0               ; Character count (0..126)
+
+.rl_read_char:
+    call INCHAR
+    ld b, a               ; Save character in B
+
+    cp 13
+    jr z, .rl_end_line
+    cp 10
+    jr z, .rl_end_line
+
+    cp 8
+    jr z, .rl_backspace
+    cp 127
+    jr z, .rl_backspace
+
+    ld a, c
+    cp 126
+    jr nc, .rl_read_char  ; Cap input at 126 characters
+
+    ld a, b
+    cp 'a'
+    jr c, .rl_not_lower
+    cp 'z' + 1
+    jr nc, .rl_not_lower
+    sub 32
+.rl_not_lower:
+    ld (hl), a
+    inc hl
+    inc c
+    call OUTCHAR
+    jr .rl_read_char
+
+.rl_backspace:
+    ld a, c
+    or a
+    jr z, .rl_read_char   ; Nothing to erase
+    dec c
+    dec hl
+    ld a, 8
+    call OUTCHAR
+    ld a, ' '
+    call OUTCHAR
+    ld a, 8
+    call OUTCHAR
+    jr .rl_read_char
+
+.rl_end_line:
+    ld (hl), 0            ; Null terminate buffer
+    call PRINT_CRLF
+    pop hl
+    pop de
+    pop bc
+    ret
+
 POWERS_OF_10:
     defw 0xCA00, 0x3B9A   ; 1,000,000,000
     defw 0xE100, 0x05F5   ; 100,000,000
