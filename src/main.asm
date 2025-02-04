@@ -20,5 +20,15 @@ main:
     ld hl, 12345
     ld (MEM_RAND_SEED), hl
 
-    ; Halt until next stages are hooked
-    halt
+    ; 5. Print startup banner "PBasic\n"
+    ld hl, MSG_BANNER
+    call PRINT_STR
+
+    ; 6. Initialize program memory linked list
+    call PROG_INIT
+
+    ; 7. Clear variable storage
+    call VAR_INIT
+
+    ; 8. Enter REPL loop
+    jp REPL

@@ -10,7 +10,12 @@ FILES=(
     src/main.asm
     src/defs.inc
     src/strings.asm
+    src/variables.asm
+    src/repl.asm
+    src/commands.asm
     src/io.asm
+    src/tokenize.asm
+    src/memmgr.asm
 )
 
 TMP_ASM=$(mktemp /tmp/pbasic_XXXXXX.asm)
