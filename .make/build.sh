@@ -15,6 +15,7 @@ FILES=(
     src/commands.asm
     src/io.asm
     src/tokenize.asm
+    src/detokenize.asm
     src/memmgr.asm
 )
 
