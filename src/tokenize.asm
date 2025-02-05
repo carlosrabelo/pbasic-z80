@@ -1,5 +1,5 @@
 ; ============================================================================
-; PBasic Z80 - Bytecode Tokenizer Engine and Keyword Matching
+; PBasic Z80 - Bytecode Tokenizer Engine and Number Parser
 ; ============================================================================
 
 TOKENIZE:
@@ -31,7 +31,7 @@ TOKENIZE:
 .tok_check_keyword:
     call TRY_MATCH_KEYWORD
     or a
-    jr z, .tok_fallback
+    jr z, .tok_check_digit
 
     ; Keyword matched! Token in A
     ld b, a
@@ -61,6 +61,16 @@ TOKENIZE:
     ld (SCR_PTR2), de
     jr .tok_end
 
+.tok_check_digit:
+    ld hl, (SCR_PTR)
+    ld a, (hl)
+    cp '0'
+    jr c, .tok_fallback
+    cp '9' + 1
+    jr nc, .tok_fallback
+    call PARSE_NUMBER
+    jr .tok_loop
+
 .tok_fallback:
     ; Emit single character directly to token buffer
     ld hl, (SCR_PTR)
@@ -82,6 +92,71 @@ TOKENIZE:
     pop de
     pop bc
     pop af
+    ret
+
+; ============================================================================
+; Numeric Literal Parsing
+; ============================================================================
+
+PARSE_NUMBER:
+    push bc
+    push de
+    push hl
+    push ix
+
+    ; 1. Emit TOK_NUMBER (0xC0)
+    ld de, (SCR_PTR2)
+    ld a, TOK_NUMBER
+    ld (de), a
+    inc de
+    ld (SCR_PTR2), de
+
+    ; 2. Parse decimal digits into 16-bit integer HL
+    ld hl, 0
+    ld ix, (SCR_PTR)
+
+.pn_loop:
+    ld a, (ix+0)
+    cp '0'
+    jr c, .pn_done
+    cp '9' + 1
+    jr nc, .pn_done
+
+    sub '0'
+    ld c, a               ; C = digit
+
+    ; HL = HL * 10
+    add hl, hl            ; * 2
+    ld d, h
+    ld e, l               ; DE = HL * 2
+    add hl, hl            ; * 4
+    add hl, hl            ; * 8
+    add hl, de            ; * 10
+
+    ; HL = HL + digit
+    ld b, 0
+    add hl, bc
+
+    inc ix
+    jr .pn_loop
+
+.pn_done:
+    ld (SCR_PTR), ix      ; Advance SCR_PTR past number
+
+    ; 3. Emit 16-bit word in little-endian order (<lo> <hi>)
+    ld de, (SCR_PTR2)
+    ld a, l
+    ld (de), a
+    inc de
+    ld a, h
+    ld (de), a
+    inc de
+    ld (SCR_PTR2), de
+
+    pop ix
+    pop hl
+    pop de
+    pop bc
     ret
 
 ; ============================================================================
