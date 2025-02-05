@@ -1,5 +1,5 @@
 ; ============================================================================
-; PBasic Z80 - Bytecode Tokenizer Engine and Number Parser
+; PBasic Z80 - Bytecode Tokenizer Engine
 ; ============================================================================
 
 TOKENIZE:
@@ -17,21 +17,21 @@ TOKENIZE:
     ld hl, (SCR_PTR)
     ld a, (hl)
 
-    ; End of line check
+    ; 1. End of line check
     or a
-    jr z, .tok_end
+    jp z, .tok_end
 
-    ; Skip spaces
+    ; 2. Skip whitespace
     cp ' '
     jr nz, .tok_check_keyword
     inc hl
     ld (SCR_PTR), hl
-    jr .tok_loop
+    jp .tok_loop
 
 .tok_check_keyword:
     call TRY_MATCH_KEYWORD
     or a
-    jr z, .tok_check_digit
+    jr z, .tok_check_string
 
     ; Keyword matched! Token in A
     ld b, a
@@ -43,7 +43,7 @@ TOKENIZE:
     ; Check if REM (0x8C)
     ld a, b
     cp TOK_REM
-    jr nz, .tok_loop
+    jp nz, .tok_loop
 
     ; REM: copy all remaining characters until 0x00
     ld hl, (SCR_PTR)
@@ -59,20 +59,136 @@ TOKENIZE:
 .tok_rem_done:
     ld (SCR_PTR), hl
     ld (SCR_PTR2), de
-    jr .tok_end
+    jp .tok_end
+
+.tok_check_string:
+    ; 3. String literal check: '"'
+    ld hl, (SCR_PTR)
+    ld a, (hl)
+    cp '"'
+    jr nz, .tok_check_digit
+
+    ; Advance past opening quote
+    inc hl
+    ld de, (SCR_PTR2)
+    ld a, TOK_STRING      ; 0xC1
+    ld (de), a
+    inc de
+
+.tok_str_loop:
+    ld a, (hl)
+    or a
+    jr z, .tok_str_close
+    cp '"'
+    jr z, .tok_str_quote
+    ld (de), a
+    inc hl
+    inc de
+    jr .tok_str_loop
+
+.tok_str_quote:
+    inc hl                ; Advance past closing quote
+.tok_str_close:
+    ld a, TOK_STRING      ; 0xC1
+    ld (de), a
+    inc de
+    ld (SCR_PTR), hl
+    ld (SCR_PTR2), de
+    jp .tok_loop
 
 .tok_check_digit:
+    ; 4. Numeric literal check: '0'..'9'
     ld hl, (SCR_PTR)
     ld a, (hl)
     cp '0'
-    jr c, .tok_fallback
+    jr c, .tok_check_relop
     cp '9' + 1
-    jr nc, .tok_fallback
+    jr nc, .tok_check_relop
     call PARSE_NUMBER
-    jr .tok_loop
+    jp .tok_loop
+
+.tok_check_relop:
+    ; 5. Multi-character relational operators: '<>', '<=', '>='
+    ld hl, (SCR_PTR)
+    ld a, (hl)
+    cp '<'
+    jr z, .tok_relop_lt
+    cp '>'
+    jr z, .tok_relop_gt
+    jr .tok_check_variable
+
+.tok_relop_lt:
+    inc hl
+    ld a, (hl)
+    cp '>'
+    jr z, .tok_relop_neq
+    cp '='
+    jr z, .tok_relop_lte
+    ; Standalone '<'
+    dec hl
+    jr .tok_fallback
+
+.tok_relop_neq:
+    inc hl
+    ld (SCR_PTR), hl
+    ld de, (SCR_PTR2)
+    ld a, TOK_NEQ         ; 0xB0
+    ld (de), a
+    inc de
+    ld (SCR_PTR2), de
+    jp .tok_loop
+
+.tok_relop_lte:
+    inc hl
+    ld (SCR_PTR), hl
+    ld de, (SCR_PTR2)
+    ld a, TOK_LTE         ; 0xB1
+    ld (de), a
+    inc de
+    ld (SCR_PTR2), de
+    jp .tok_loop
+
+.tok_relop_gt:
+    inc hl
+    ld a, (hl)
+    cp '='
+    jr z, .tok_relop_gte
+    ; Standalone '>'
+    dec hl
+    jr .tok_fallback
+
+.tok_relop_gte:
+    inc hl
+    ld (SCR_PTR), hl
+    ld de, (SCR_PTR2)
+    ld a, TOK_GTE         ; 0xB2
+    ld (de), a
+    inc de
+    ld (SCR_PTR2), de
+    jp .tok_loop
+
+.tok_check_variable:
+    ; 6. Variable check: 'A'..'Z'
+    ld hl, (SCR_PTR)
+    ld a, (hl)
+    cp 'A'
+    jr c, .tok_fallback
+    cp 'Z' + 1
+    jr nc, .tok_fallback
+
+    ; Single-letter variable: 0xD0 + (A - 'A')
+    sub 'A'
+    add a, TOK_VAR_BASE
+    ld de, (SCR_PTR2)
+    ld (de), a
+    inc de
+    ld (SCR_PTR2), de
+    inc hl
+    ld (SCR_PTR), hl
+    jp .tok_loop
 
 .tok_fallback:
-    ; Emit single character directly to token buffer
+    ; 7. Punctuation and standalone operators emitted verbatim
     ld hl, (SCR_PTR)
     ld de, (SCR_PTR2)
     ld a, (hl)
@@ -81,7 +197,7 @@ TOKENIZE:
     ld (SCR_PTR2), de
     inc hl
     ld (SCR_PTR), hl
-    jr .tok_loop
+    jp .tok_loop
 
 .tok_end:
     ; Terminate token stream with 0x00
