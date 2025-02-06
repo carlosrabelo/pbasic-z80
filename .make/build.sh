@@ -17,6 +17,7 @@ FILES=(
     src/tokenize.asm
     src/detokenize.asm
     src/memmgr.asm
+    src/lines.asm
 )
 
 TMP_ASM=$(mktemp /tmp/pbasic_XXXXXX.asm)
