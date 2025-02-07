@@ -11,6 +11,7 @@ FILES=(
     src/defs.inc
     src/strings.asm
     src/variables.asm
+    src/math.asm
     src/repl.asm
     src/commands.asm
     src/cmd_list.asm
