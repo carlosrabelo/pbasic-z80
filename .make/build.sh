@@ -13,6 +13,7 @@ FILES=(
     src/variables.asm
     src/repl.asm
     src/commands.asm
+    src/cmd_list.asm
     src/io.asm
     src/tokenize.asm
     src/detokenize.asm
