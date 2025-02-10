@@ -10,8 +10,10 @@ FILES=(
     src/main.asm
     src/defs.inc
     src/strings.asm
+    src/util.asm
     src/variables.asm
     src/math.asm
+    src/expr.asm
     src/repl.asm
     src/commands.asm
     src/cmd_list.asm
