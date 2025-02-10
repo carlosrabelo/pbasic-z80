@@ -198,6 +198,10 @@ EVAL_TERM:
     jp .et_loop
 
 EVAL_EXPR:
+    ; Parses an arithmetic expression: Term { ('+' | '-') Term }
+    ; Uses 32-bit two's complement addition and subtraction.
+    ; Input: MEM_TOKEN_PTR points to token stream
+    ; Output: DE:HL = 32-bit signed expression result
     ld hl, (SCR_ACC_LO)
     push hl
     ld hl, (SCR_ACC_HI)
