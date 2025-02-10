@@ -156,6 +156,9 @@ EVAL_FACTOR:
     jp EVAL_FACTOR
 
 EVAL_TERM:
+    ; Parses a multiplicative term: Factor { ('*' | '/') Factor }
+    ; Input: MEM_TOKEN_PTR points to token stream
+    ; Output: DE:HL = 32-bit evaluated term value
     call EVAL_FACTOR
 .et_loop:
     push hl
