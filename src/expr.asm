@@ -265,6 +265,8 @@ EVAL_EXPR:
     jp .ee_loop
 
 EVAL_COND:
+    ; Evaluates a boolean relational condition: Expression [ RelOp Expression ]
+    ; Returns: A = 1 (true) or A = 0 (false)
     call EVAL_EXPR
     ld (SCR_ACC_LO), hl
     ld (SCR_ACC_HI), de
