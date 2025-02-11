@@ -17,6 +17,7 @@ FILES=(
     src/repl.asm
     src/commands.asm
     src/cmd_let.asm
+    src/cmd_goto.asm
     src/cmd_print.asm
     src/cmd_end.asm
     src/cmd_list.asm
