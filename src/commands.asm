@@ -63,10 +63,6 @@ REPL_DISPATCH:
     ld (MEM_TOKEN_PTR), hl
     jp DO_FREE
 
-RUN_NEXT:
-    ; For now, loops back to REPL
-    jp REPL
-
 ; Command jump table for tokens 0x80..0x8C
 CMD_JUMP_TABLE:
     defw DO_LET      ; 0x80
@@ -90,5 +86,4 @@ DO_IF:      jp REPL_SYNTAX_ERROR
 DO_INPUT:   jp REPL_SYNTAX_ERROR
 DO_RETURN:  jp REPL_SYNTAX_ERROR
 DO_END:     jp REPL_SYNTAX_ERROR
-DO_RUN:     jp REPL_SYNTAX_ERROR
 DO_EXIT:    jp REPL_SYNTAX_ERROR

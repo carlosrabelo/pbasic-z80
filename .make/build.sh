@@ -19,6 +19,7 @@ FILES=(
     src/cmd_let.asm
     src/cmd_print.asm
     src/cmd_list.asm
+    src/cmd_run.asm
     src/cmd_new.asm
     src/cmd_free.asm
     src/cmd_rem.asm
