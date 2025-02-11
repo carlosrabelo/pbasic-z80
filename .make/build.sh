@@ -19,6 +19,7 @@ FILES=(
     src/cmd_let.asm
     src/cmd_print.asm
     src/cmd_list.asm
+    src/cmd_new.asm
     src/io.asm
     src/tokenize.asm
     src/detokenize.asm
