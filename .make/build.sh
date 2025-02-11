@@ -16,6 +16,7 @@ FILES=(
     src/expr.asm
     src/repl.asm
     src/commands.asm
+    src/cmd_let.asm
     src/cmd_print.asm
     src/cmd_list.asm
     src/io.asm
