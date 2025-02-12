@@ -3,8 +3,10 @@
 ; ============================================================================
 
 RAND16:
+    ; 16-bit Linear Congruential Generator (LCG):
     ; seed = (seed * 25173 + 13849) mod 65536
-    ; Output: HL = new 16-bit pseudo-random word
+    ; Output: HL = new 16-bit pseudo-random word (0..65535)
+    ; Preserves: DE
     push de
     ld hl, (MEM_RAND_SEED)
     ld de, 25173
