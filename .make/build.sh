@@ -18,7 +18,9 @@ FILES=(
     src/commands.asm
     src/cmd_let.asm
     src/cmd_goto.asm
+    src/cmd_gosub.asm
     src/cmd_print.asm
+    src/cmd_return.asm
     src/cmd_end.asm
     src/cmd_list.asm
     src/cmd_run.asm

@@ -80,7 +80,5 @@ CMD_JUMP_TABLE:
     defw DO_REM      ; 0x8C
 
 ; Temporary stubs until respective modules are implemented
-DO_GOSUB:   jp REPL_SYNTAX_ERROR
 DO_IF:      jp REPL_SYNTAX_ERROR
 DO_INPUT:   jp REPL_SYNTAX_ERROR
-DO_RETURN:  jp REPL_SYNTAX_ERROR
