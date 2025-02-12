@@ -71,4 +71,7 @@ DO_LIST:
     pop de
     pop bc
     pop af
-    ret
+    ld a, (MEM_RUN_FLAG)
+    or a
+    jp nz, RUN_NEXT
+    jp REPL

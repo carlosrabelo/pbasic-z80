@@ -219,14 +219,18 @@ LINE_STORE:
     inc hl
 
     ; 3. Token stream bytes terminated by 0x00
-    ld de, MEM_TOKEN_BUF + 3
-.ls_copy_tok:
-    ld a, (de)
-    ld (hl), a
+    ld bc, (SCR_NLEN)
+    dec bc
+    dec bc
+    dec bc
+    dec bc
+    ld de, (SCR_INS)
     inc de
-    inc hl
-    or a
-    jr nz, .ls_copy_tok
+    inc de
+    inc de
+    inc de
+    ld hl, MEM_TOKEN_BUF + 3
+    ldir
     ret
 
 DELETE_NODE_AT_DE:

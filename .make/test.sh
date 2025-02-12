@@ -78,11 +78,13 @@ if [[ -f demos/99_test.bas ]] && command -v mojave >/dev/null 2>&1; then
     echo "Running simulator regression test..."
     OUTPUT=$(mojave --machine z80 --load-bin bin/pbasic.bin < demos/99_test.bas 2>&1 || true)
     
-    if ! echo "$OUTPUT" | grep -q -- "--- TEST COMPLETE ---"; then
-        echo "Regression test failed: '--- TEST COMPLETE ---' not found" >&2
-        echo "$OUTPUT"
-        exit 1
-    fi
+    for expected in "--- TEST COMPLETE ---" "IN SUBROUTINE!" "ABS OF -15 IS: 15" "NEG FIFTEEN IS: -15"; do
+        if ! echo "$OUTPUT" | grep -q -- "$expected"; then
+            echo "Regression test failed: '$expected' not found in simulator output" >&2
+            echo "$OUTPUT"
+            exit 1
+        fi
+    done
     echo "Regression test passed."
 fi
 

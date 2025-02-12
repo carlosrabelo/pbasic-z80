@@ -185,6 +185,7 @@ FIX_NEXT_ADD:
     ld a, c
     cp l
     jr c, .fna_skip
+    jr z, .fna_skip
 
 .fna_do_add:
     ld hl, (SCR_LEN)
