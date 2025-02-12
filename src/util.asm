@@ -16,3 +16,11 @@ RAND16:
     ld (MEM_RAND_SEED), hl
     pop de
     ret
+
+ABS:
+    ; Input: DE:HL = 32-bit signed integer
+    ; Output: DE:HL = absolute value
+    bit 7, d
+    ret z
+    jp NEG32
+

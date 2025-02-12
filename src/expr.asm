@@ -123,9 +123,7 @@ EVAL_FACTOR:
 .ef_abs_close_done:
     pop hl
     pop de
-    bit 7, d
-    ret z
-    jp NEG32
+    jp ABS
 
 .ef_paren:
     inc hl
