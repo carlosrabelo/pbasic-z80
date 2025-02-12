@@ -78,6 +78,3 @@ CMD_JUMP_TABLE:
     defw DO_NEW      ; 0x8A
     defw DO_EXIT     ; 0x8B
     defw DO_REM      ; 0x8C
-
-; Temporary stubs until respective modules are implemented
-DO_INPUT:   jp REPL_SYNTAX_ERROR
