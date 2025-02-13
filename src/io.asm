@@ -220,7 +220,6 @@ READ_LINE:
     ld (hl), a
     inc hl
     inc c
-    call OUTCHAR
     jr .rl_read_char
 
 .rl_backspace:
@@ -229,17 +228,10 @@ READ_LINE:
     jr z, .rl_read_char   ; Nothing to erase
     dec c
     dec hl
-    ld a, 8
-    call OUTCHAR
-    ld a, ' '
-    call OUTCHAR
-    ld a, 8
-    call OUTCHAR
     jr .rl_read_char
 
 .rl_end_line:
     ld (hl), 0            ; Null terminate buffer
-    call PRINT_CRLF
     pop hl
     pop de
     pop bc
